@@ -6,16 +6,16 @@ from scipy import signal
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
 #filename = sys.argv[1]
-filename = 'normal.csv'
+filename = 'gait1.csv'
 gait = pd.read_csv(filename)
 columns = gait.columns
 print(columns[0])
 if 'ay (m/s^2)' in columns:
     gait = gait.rename(columns={"ay (m/s^2)": "ay"})
-print(gait)
+# print(gait)
 
 #time decision
-gait = gait.loc[(gait['time']>10)&(gait['time']<60)]
+gait = gait.loc[(gait['time']>10)&(gait['time']<600)]
 
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
@@ -69,5 +69,6 @@ result = result.rename(columns={"time": "right", 0: "left"})
 
 print(result['right'].mean())
 print(result['left'].mean())
+print(gait)
 
 #print(result)
