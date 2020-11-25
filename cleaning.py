@@ -3,10 +3,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
+from scipy import stats
+
 
 #filename = sys.argv[1]
 
-filename = 'pt.csv'
+filename = 'phong.csv'
 gait = pd.read_csv(filename)
 columns = gait.columns
 if 'ay (m/s^2)' in columns:
@@ -15,7 +17,7 @@ if 'ay (m/s^2)' in columns:
 
 
 #time decision
-gait = gait.loc[(gait['time']>60)&(gait['time']<280)]
+gait = gait.loc[(gait['time']>60)&(gait['time']<600)]
 
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
@@ -89,4 +91,24 @@ print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
 
-#print(result)
+
+## Khoa
+# plt.plot(result.index, result['right'], 'b-', label = "right step")
+# plt.plot(result.index, result['left'], 'r-', label = "left step")
+plt.hist([result['right'], result['left']], bins=50, label=['right', 'left'])
+plt.legend(loc='upper right')
+plt.show()
+
+## Check for normal distribution and equal variance. If p > 0.05 then it's valid to do t-test
+print()
+print("test normality right: ",stats.normaltest(result['right']).pvalue)
+print("test normality left: ",stats.normaltest(result['left']).pvalue)
+print("test variance: ",stats.levene(result['right'], result['left']).pvalue)
+
+
+## Compute T-test. Null hypothese: right step and left step have the same step time. If p < 0.05, we reject the null hypothesis
+ttest = stats.ttest_ind(result['right'], result['left'])
+print()
+print(ttest)
+# print(ttest.statistic)
+# print(ttest.pvalue)
