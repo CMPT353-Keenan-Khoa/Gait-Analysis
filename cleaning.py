@@ -8,7 +8,7 @@ from scipy import stats
 
 #filename = sys.argv[1]
 
-filename = 'phong.csv'
+filename = 'pt.csv'
 gait = pd.read_csv(filename)
 columns = gait.columns
 if 'ay (m/s^2)' in columns:
