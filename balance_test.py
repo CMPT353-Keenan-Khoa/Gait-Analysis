@@ -69,9 +69,9 @@ def ttest(gait):
     ## Check for normal distribution and equal variance. If p > 0.05 then it's valid to do t-test
     test_variance = stats.levene(gait['right'], gait['left']).pvalue
 
-    print("normality right: ", normality_right)
-    print("normality left: ", normality_left)
-    print("variance: ", test_variance)
+    print("normality test right: ", normality_right)
+    print("normality test left: ", normality_left)
+    print("variance test: ", test_variance)
 
     ## Compute T-test. Null hypothese: right step and left step have the same step time. If p < 0.05, we reject the null hypothesis
     ttest = stats.ttest_ind(gait['right'], gait['left'])
@@ -87,7 +87,7 @@ def utest(gait):
 
 
 if __name__ == '__main__':
-    filename = 'khoa.csv'
+    filename = 'phong.csv'
     print(filename)
     data = pd.read_csv(filename)
     gait = filter(data, 60, 600)
