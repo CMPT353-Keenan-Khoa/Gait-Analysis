@@ -9,6 +9,7 @@ from scipy import stats
 #filename = sys.argv[1]
 
 filename = 'phong.csv'
+output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
 if 'ay (m/s^2)' in columns:
@@ -17,7 +18,7 @@ if 'ay (m/s^2)' in columns:
 
 
 #time decision
-gait = gait.loc[(gait['time']>60)&(gait['time']<600)]
+gait = gait.loc[(gait['time']>10)&(gait['time']<60)]
 
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
@@ -81,8 +82,8 @@ steptimeL.dropna(inplace=True)
 result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
 result = result.rename(columns={"time": "right", 0: "left"})
 
-gaittest['one swing'] = gaittest['distance(cm)'] / len(gaitleft)
-print(gaittest)
+#gaittest['one swing'] = gaittest['distance(cm)'] / len(gaitleft)
+#print(gaittest)
 
 #result = result.loc[((result['right']<0.42*1.5)&(result['right']>0.42*0.5))|((result['left']<0.42*1.5)&(result['left']>0.42*0.5))]
 
@@ -91,6 +92,7 @@ print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
 
+result.to_csv(output, index=False)
 
 ## Khoa
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
@@ -101,13 +103,20 @@ plt.show()
 
 ## Check for normal distribution and equal variance. If p > 0.05 then it's valid to do t-test
 print()
-print("test normality right: ",stats.normaltest(result['right']).pvalue)
-print("test normality left: ",stats.normaltest(result['left']).pvalue)
-print("test variance: ",stats.levene(result['right'], result['left']).pvalue)
+
+#power exp log sqrt
+result['right2'] = np.log(result['right'])
+result['left2'] = np.log(result['left'])
+
+result.dropna(inplace=True)
+
+print("test normality right: ",stats.normaltest(result['right2']).pvalue)
+print("test normality left: ",stats.normaltest(result['left2']).pvalue)
+print("test variance: ",stats.levene(result['right2'], result['left2']).pvalue)
 
 
 ## Compute T-test. Null hypothese: right step and left step have the same step time. If p < 0.05, we reject the null hypothesis
-ttest = stats.ttest_ind(result['right'], result['left'])
+ttest = stats.ttest_ind(result['right2'], result['left2'])
 print()
 print(ttest)
 # print(ttest.statistic)
