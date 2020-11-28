@@ -7,7 +7,6 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-
 filename = 'phong.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
