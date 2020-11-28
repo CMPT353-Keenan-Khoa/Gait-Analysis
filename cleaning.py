@@ -93,7 +93,7 @@ print("ave a left step(sec): ",result['left'].mean())
 
 result.to_csv(output, index=False)
 
-## Khoa
+## Khoa ttest
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
 # plt.plot(result.index, result['left'], 'r-', label = "left step")
 plt.hist([result['right'], result['left']], bins=50, label=['right', 'left'])
