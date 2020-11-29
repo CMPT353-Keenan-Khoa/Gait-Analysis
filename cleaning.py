@@ -19,10 +19,6 @@ if 'ay (m/s^2)' in columns:
 #time decision
 gait = gait.loc[(gait['time']>0)&(gait['time']<600)]
 
-timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
-distance = 100
-
-
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
 gait['ay'] = signal.filtfilt(b, a, gait['ay'])
@@ -36,12 +32,6 @@ gait['next'] = gait['ay'].shift(periods=-1)
 gait['timeN'] = gait['time'].shift(periods=-1)
 gait = gait[['time','ay','next', 'timeN', 'prev']]
 gait.dropna(inplace=True)
-
-print(gait)
-
-gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
-gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
-gait['distance(cm)'] = gait['distance(cm)'] * 100
 
 #gaitmax = gait.loc[(gait['ay']>gait['prev'])&(gait['ay']>gait['next'])]
 #gaitmin = gait.loc[(gait['gFy']<gait['prev'])&(gait['gFy']<gait['next'])]
@@ -59,8 +49,7 @@ gaitright = gaitright.reset_index()
 #print(gaitright)
 
 
-gait['test'] = 1
-gaittest = gait.groupby('test').sum()
+
 
 gaitright['timeN'] = gaitright['time'].shift(periods=-1)
 gaitleft['timeN'] = gaitleft['time'].shift(periods=-1)
@@ -122,14 +111,26 @@ print()
 
 
 #pace test
+#distance calculation
+gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
+gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
+gait['distance(cm)'] = gait['distance(cm)'] * 100
+
+#time taken calculation
+timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
+
+#number of step calculation
+gait['test'] = 1
+gaittest = gait.groupby('test').sum()
 result['pivot'] = 1
 result['count'] = 1
+result2 = result.groupby('pivot').sum()
 
-result = result.groupby('pivot').sum()
+distance = 10000
 
-print("pace steps/time(sec): ", result['count'].values[0]/timetaken)
+print("pace steps/time(sec): ", result2['count'].values[0]/timetaken)
 #for fixed distance
-#print("pace steps/distance(m): ", result['count'].values[0]/distance)
+#print("pace steps/distance(m): ", result2['count'].values[0]/distance)
 #for calculated distance(device must be placed on foot)
-#print("pace steps/distance(m): ", result['count'].values[0]/gaittest['distance(cm)'].values[0])
+#print("pace steps/distance(m): ", result2['count'].values[0]/gaittest['distance(cm)'].values[0])
 #unit is cm
