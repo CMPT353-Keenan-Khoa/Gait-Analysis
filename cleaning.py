@@ -120,22 +120,20 @@ gait.dropna(inplace=True)
 #gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['speed']**2 - gait['speedP']**2 / (gait['ay']*2)
 gait['distance(cm)'] = gait['distance(cm)'] * 100
-gait['test'] = 1
-gaittest = gait.groupby('test').sum()
-print(gaittest)
+gaittest = gait.loc[(gait['distance(cm)']>0)]
+distanceC = gaittest['distance(cm)'].values.sum()
 
 #time taken calculation
 timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
 
 #number of step calculation
-result['pivot'] = 1
 result['count'] = 1
-result2 = result.groupby('pivot').sum()
+step = result['count'].values.sum()
 
 distance = 10000
-print("pace steps/time(sec): ", result2['count'].values[0]/timetaken)
+print("pace steps/time(sec): ", step/timetaken)
 #for fixed distance
-#print("pace steps/distance(m): ", result2['count'].values[0]/distance)
+#print("pace steps/distance(m): ", step/distance)
 #for calculated distance(device must be placed on foot)
-#print("pace steps/distance(m): ", result2['count'].values[0]/gaittest['distance(cm)'].values[0])
+print("pace steps/distance(cm): ", step/distanceC)
 #unit is cm
