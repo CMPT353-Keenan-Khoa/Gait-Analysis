@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'keenan.csv'
+filename = 'fake.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -129,6 +129,11 @@ timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
 #number of step calculation
 result['count'] = 1
 step = result['count'].values.sum()
+
+
+print("steps: ",step)
+print("time: ",timetaken)
+print("distance: ",distanceC)
 
 distance = 10000
 print("pace steps/time(sec): ", step/timetaken)
