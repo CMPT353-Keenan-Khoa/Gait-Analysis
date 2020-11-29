@@ -19,6 +19,10 @@ if 'ay (m/s^2)' in columns:
 #time decision
 gait = gait.loc[(gait['time']>10)&(gait['time']<60)]
 
+timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
+distance = 100
+
+
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
 gait['ay'] = signal.filtfilt(b, a, gait['ay'])
@@ -93,6 +97,10 @@ print("ave a left step(sec): ",result['left'].mean())
 
 result.to_csv(output, index=False)
 
+
+
+
+
 ## Khoa ttest
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
 # plt.plot(result.index, result['left'], 'r-', label = "left step")
@@ -118,5 +126,14 @@ print("test variance: ",stats.levene(result['right2'], result['left2']).pvalue)
 ttest = stats.ttest_ind(result['right2'], result['left2'])
 print()
 print(ttest)
+print()
 # print(ttest.statistic)
 # print(ttest.pvalue)
+
+result['pivot'] = 1
+result['count'] = 1
+
+result = result.groupby('pivot').sum()
+
+print("pace steps/time(sec): ", result['count'].values[0]/timetaken)
+#print("pace steps/distance(m): ", result['count'].values[0]/distance)
