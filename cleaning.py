@@ -130,6 +130,6 @@ result = result.groupby('pivot').sum()
 print("pace steps/time(sec): ", result['count'].values[0]/timetaken)
 #for fixed distance
 #print("pace steps/distance(m): ", result['count'].values[0]/distance)
-#for calculated distance
+#for calculated distance(device must be placed on foot)
 #print("pace steps/distance(m): ", result['count'].values[0]/gaittest['distance(cm)'].values[0])
 #unit is cm
