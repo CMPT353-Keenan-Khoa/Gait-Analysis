@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'fake.csv'
+filename = 'pt.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -80,7 +80,7 @@ print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
 
-result.to_csv(output, index=False)
+#result.to_csv(output, index=False)
 
 ## Khoa ttest
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
@@ -142,3 +142,4 @@ print("pace steps/time(sec): ", step/timetaken)
 #for calculated distance(device must be placed on foot)
 print("pace steps/distance(cm): ", step/distanceC)
 #unit is cm
+print("step length(cm): ", distanceC/step)
