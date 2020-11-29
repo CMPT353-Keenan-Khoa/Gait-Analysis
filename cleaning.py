@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'phong.csv'
+filename = 'keenan.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -17,7 +17,9 @@ if 'ay (m/s^2)' in columns:
 
 
 #time decision
-gait = gait.loc[(gait['time']>0)&(gait['time']<600)]
+leng = len(gait['time'])
+cut = int(leng*0.1)
+gait = gait.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
@@ -127,7 +129,6 @@ result['count'] = 1
 result2 = result.groupby('pivot').sum()
 
 distance = 10000
-
 print("pace steps/time(sec): ", result2['count'].values[0]/timetaken)
 #for fixed distance
 #print("pace steps/distance(m): ", result2['count'].values[0]/distance)
