@@ -115,13 +115,13 @@ print()
 gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['distance(cm)'] * 100
+gait['test'] = 1
+gaittest = gait.groupby('test').sum()
 
 #time taken calculation
 timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
 
 #number of step calculation
-gait['test'] = 1
-gaittest = gait.groupby('test').sum()
 result['pivot'] = 1
 result['count'] = 1
 result2 = result.groupby('pivot').sum()
