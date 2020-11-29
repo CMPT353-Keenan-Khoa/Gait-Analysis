@@ -120,6 +120,8 @@ print()
 # print(ttest.statistic)
 # print(ttest.pvalue)
 
+
+#pace test
 result['pivot'] = 1
 result['count'] = 1
 
@@ -130,3 +132,4 @@ print("pace steps/time(sec): ", result['count'].values[0]/timetaken)
 #print("pace steps/distance(m): ", result['count'].values[0]/distance)
 #for calculated distance
 #print("pace steps/distance(m): ", result['count'].values[0]/gaittest['distance(cm)'].values[0])
+#unit is cm
