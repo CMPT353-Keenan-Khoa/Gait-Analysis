@@ -115,10 +115,14 @@ print()
 #pace test
 #distance calculation
 gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
-gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
+gait['speedP'] = gait['speed'].shift(periods=1)
+gait.dropna(inplace=True)
+#gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
+gait['distance(cm)'] = gait['speed']**2 - gait['speedP']**2 / (gait['ay']*2)
 gait['distance(cm)'] = gait['distance(cm)'] * 100
 gait['test'] = 1
 gaittest = gait.groupby('test').sum()
+print(gaittest)
 
 #time taken calculation
 timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
