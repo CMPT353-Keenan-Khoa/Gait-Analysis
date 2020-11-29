@@ -17,7 +17,7 @@ if 'ay (m/s^2)' in columns:
 
 
 #time decision
-gait = gait.loc[(gait['time']>10)&(gait['time']<60)]
+gait = gait.loc[(gait['time']>0)&(gait['time']<600)]
 
 timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
 distance = 100
@@ -36,6 +36,8 @@ gait['next'] = gait['ay'].shift(periods=-1)
 gait['timeN'] = gait['time'].shift(periods=-1)
 gait = gait[['time','ay','next', 'timeN', 'prev']]
 gait.dropna(inplace=True)
+
+print(gait)
 
 gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
@@ -58,9 +60,7 @@ gaitright = gaitright.reset_index()
 
 
 gait['test'] = 1
-gaittest = gait.loc[(gait['distance(cm)']>0)]
-
-gaittest = gaittest.groupby('test').sum()
+gaittest = gait.groupby('test').sum()
 
 gaitright['timeN'] = gaitright['time'].shift(periods=-1)
 gaitleft['timeN'] = gaitleft['time'].shift(periods=-1)
@@ -85,21 +85,11 @@ steptimeL.dropna(inplace=True)
 result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
 result = result.rename(columns={"time": "right", 0: "left"})
 
-#gaittest['one swing'] = gaittest['distance(cm)'] / len(gaitleft)
-#print(gaittest)
-
-#result = result.loc[((result['right']<0.42*1.5)&(result['right']>0.42*0.5))|((result['left']<0.42*1.5)&(result['left']>0.42*0.5))]
-
-
 print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
 
 result.to_csv(output, index=False)
-
-
-
-
 
 ## Khoa ttest
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
@@ -136,4 +126,7 @@ result['count'] = 1
 result = result.groupby('pivot').sum()
 
 print("pace steps/time(sec): ", result['count'].values[0]/timetaken)
+#for fixed distance
 #print("pace steps/distance(m): ", result['count'].values[0]/distance)
+#for calculated distance
+#print("pace steps/distance(m): ", result['count'].values[0]/gaittest['distance(cm)'].values[0])
