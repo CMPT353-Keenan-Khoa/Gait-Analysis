@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'soo1.csv'
+filename = 'data/100-normal-ankle-1.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
