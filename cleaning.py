@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'data/100-normal-ankle-1.csv'
+filename = 'soo1.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -27,8 +27,6 @@ b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
 gait['ay'] = signal.filtfilt(b, a, gait['ay'])
 plt.plot(gait['time'], gait['ay'], 'b-')
 plt.show()
-
-
 
 gait['prev'] = gait['ay'].shift(periods=1)
 gait['next'] = gait['ay'].shift(periods=-1)
@@ -83,6 +81,7 @@ print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
 
+
 #result.to_csv(output, index=False)
 
 ## Khoa ttest
@@ -128,8 +127,7 @@ gait.dropna(inplace=True)
 #gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['speed']**2 - gait['speedP']**2 / (gait['ay']*2)
 gait['distance(cm)'] = gait['distance(cm)'] * 100
-gaittest = gait.loc[(gait['distance(cm)']>0)]
-distanceC = gaittest['distance(cm)'].values.sum()
+distanceC = gait['distance(cm)'].values.sum()
 
 #time taken calculation
 timetaken = (gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]) - remove

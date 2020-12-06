@@ -17,12 +17,13 @@ def filter(gait):
     #time decision
     leng = len(gait['time'])
     cut = int(leng*0.2)
-    gait = gait.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
+    data = data.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 
 
     #butter filter
     b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
     data['ay'] = signal.filtfilt(b, a, data['ay'])
+
     return data
 
 
@@ -63,7 +64,7 @@ def cleaning(data):
 
     result = result.loc[(result['right']>0.1)&(result['right']<2)]
     result = result.loc[(result['left']>0.1)&(result['left']<2)]
-
+    
     return result
 
 
@@ -94,11 +95,13 @@ def utest(gait):
 
 if __name__ == '__main__':
     filename = 'soo1.csv'
+    output = filename[0:-4] + 'result.csv'
     print(filename)
     data = pd.read_csv(filename)
     gait = filter(data)
 
     cleaned_data = cleaning(gait)
+    cleaned_data.to_csv(output, index=False)
 
     ttest_result = ttest(cleaned_data)
     print(ttest_result)
