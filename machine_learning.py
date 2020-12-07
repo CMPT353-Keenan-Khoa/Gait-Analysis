@@ -14,9 +14,12 @@ from sklearn.ensemble import RandomForestClassifier
 ### x, y are known data input. x_predict is value want to predict
 def linear_reg(x,y, x_predict):
     X = np.stack([x['step'], x['pace']], axis=1)  # join 1D array to 2D
-    model = LinearRegression(fit_intercept=True)  # Create a model
-    model.fit(X, y)     #Train the data
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y)
 
+    model = LinearRegression(fit_intercept=True)  # Create a model
+    model.fit(X_train, y_train)     #Train the data
+    print("lineary regression score on train: ",model.score(X_train, y_train))
+    print("linear regression score: ",model.score(X_valid, y_valid))
     ##Predict data for x_predict value
     # X_fit =  np.stack([x_predict['step'], x_predict['height']], axis=1)
     X_fit = x_predict
@@ -31,18 +34,18 @@ def linear_reg(x,y, x_predict):
 
 def polynomial_reg(x,y, x_predict):
     model = make_pipeline(
-        PolynomialFeatures(degree=n, include_bias=True),
+        PolynomialFeatures(degree=7, include_bias=True),
         LinearRegression(fit_intercept=False)
     )
-    X = np.stack([x], axis=1)
-    # X_train, X_valid, y_train, y_valid = train_test_split(X, y)
-    # model.fit(X_train, y_train)
-    # print(model.score(X_train, y_train))
-    # print(model.score(X_valid, y_valid))   
+    X = np.stack([x['step'], x['pace']], axis=1)  # join 1D array to 2D
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y)
+    model.fit(X_train, y_train)
+    print("poly regression score on train: ",model.score(X_train, y_train))
+    print("poly regression score: ",model.score(X_valid, y_valid))   
 
-    model.fit(X, y)
-    ##Predict data for x_predict value
-    X_fit =  np.stack([x_predict], axis=1)
+    # model.fit(X, y)
+    #Predict data for x_predict value
+    X_fit = x_predict
     y_fit = model.predict(X_fit)
     print(y_fit)
     return
@@ -75,8 +78,8 @@ def gender(x, y, x_predict):
 
 if __name__ == "__main__":
     data = pd.read_csv('mldata.csv')
-    print(data)
     x = data[['step', 'pace']]
     y = data['height']
-    x_predict= np.array([[5, 0.8]])
+    x_predict= np.array([[15, 0.8]])
     linear_reg(x, y , x_predict)
+    polynomial_reg(x, y , x_predict)
