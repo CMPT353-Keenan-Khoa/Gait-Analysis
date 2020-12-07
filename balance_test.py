@@ -6,7 +6,7 @@ from scipy import signal
 from scipy import stats
 
 
-def filter(gait, start, end):
+def filter(gait):
     data = gait.copy()
 
     columns = data.columns
@@ -15,12 +15,15 @@ def filter(gait, start, end):
         data = data.rename(columns={"ay (m/s^2)": "ay"})
 
     #time decision
-    data = data.loc[(data['time']>start)&(data['time']<end)]
+    leng = len(gait['time'])
+    cut = int(leng*0.2)
+    data = data.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 
 
     #butter filter
     b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
     data['ay'] = signal.filtfilt(b, a, data['ay'])
+
     return data
 
 
@@ -52,12 +55,16 @@ def cleaning(data):
         steptimeL = gaitright['time'] - gaitleft['time']
         steptimeR = gaitleft['timeN'] - gaitright['time']
 
+
     steptimeR.dropna(inplace=True)
     steptimeL.dropna(inplace=True)
 
     result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
     result = result.rename(columns={"time": "right", 0: "left"})
 
+    result = result.loc[(result['right']>0.1)&(result['right']<2)]
+    result = result.loc[(result['left']>0.1)&(result['left']<2)]
+    
     return result
 
 
@@ -87,12 +94,14 @@ def utest(gait):
 
 
 if __name__ == '__main__':
-    filename = 'phong.csv'
+    filename = 'soo1.csv'
+    output = filename[0:-4] + 'result.csv'
     print(filename)
     data = pd.read_csv(filename)
-    gait = filter(data, 60, 600)
+    gait = filter(data)
 
     cleaned_data = cleaning(gait)
+    cleaned_data.to_csv(output, index=False)
 
     ttest_result = ttest(cleaned_data)
     print(ttest_result)

@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'data/100-normal-ankle-1.csv'
+filename = 'soo1.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -15,25 +15,26 @@ if 'ay (m/s^2)' in columns:
     gait = gait.rename(columns={"ay (m/s^2)": "ay"})
 
 
-
 #time decision
 leng = len(gait['time'])
-cut = int(leng*0.1)
+cut = int(leng*0.2)
 gait = gait.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
+#fixed time
+#gait = gait.loc[(gait['time']>100)&(gait['time']<110)]
 
 #butter filter
 b, a = signal.butter(3, 0.05, btype='lowpass', analog=False)
 gait['ay'] = signal.filtfilt(b, a, gait['ay'])
-#plt.plot(gait['time'], gait['ay'], 'b-')
-#plt.show()
-
-
+plt.plot(gait['time'], gait['ay'], 'b-')
+plt.show()
 
 gait['prev'] = gait['ay'].shift(periods=1)
 gait['next'] = gait['ay'].shift(periods=-1)
 gait['timeN'] = gait['time'].shift(periods=-1)
-gait = gait[['time','ay','next', 'timeN', 'prev']]
+gait['gap'] = gait['timeN']-gait['time']
+gait = gait[['time','ay','next', 'timeN', 'prev', 'gap']]
 gait.dropna(inplace=True)
+
 
 #gaitmax = gait.loc[(gait['ay']>gait['prev'])&(gait['ay']>gait['next'])]
 #gaitmin = gait.loc[(gait['gFy']<gait['prev'])&(gait['gFy']<gait['next'])]
@@ -47,14 +48,10 @@ gaitright =  gait.loc[((gait['ay']>0)&(gait['next']<0))]
 gaitleft = gaitleft.reset_index()
 gaitright = gaitright.reset_index()
 
-#print(gaitleft)
-#print(gaitright)
-
-
-
 
 gaitright['timeN'] = gaitright['time'].shift(periods=-1)
 gaitleft['timeN'] = gaitleft['time'].shift(periods=-1)
+
 
 
 
@@ -76,59 +73,67 @@ steptimeL.dropna(inplace=True)
 result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
 result = result.rename(columns={"time": "right", 0: "left"})
 
+
+result = result.loc[(result['right']>0.1)&(result['right']<2)]
+result = result.loc[(result['left']>0.1)&(result['left']<2)]
+
 print(filename)
 print("ave a right step(sec): ",result['right'].mean())
 print("ave a left step(sec): ",result['left'].mean())
+
 
 #result.to_csv(output, index=False)
 
 ## Khoa ttest
 # plt.plot(result.index, result['right'], 'b-', label = "right step")
 # plt.plot(result.index, result['left'], 'r-', label = "left step")
-plt.hist([result['right'], result['left']], bins=50, label=['right', 'left'])
-plt.legend(loc='upper right')
-plt.show()
+#plt.hist([result['right'], result['left']], bins=50, label=['right', 'left'])
+#plt.legend(loc='upper right')
+#plt.show()
 
 ## Check for normal distribution and equal variance. If p > 0.05 then it's valid to do t-test
 print()
 
 #power exp log sqrt
-result['right2'] = np.log(result['right'])
-result['left2'] = np.log(result['left'])
+#result['right2'] = np.log(result['right'])
+#result['left2'] = np.log(result['left'])
 
-result.dropna(inplace=True)
+#result.dropna(inplace=True)
 
-print("test normality right: ",stats.normaltest(result['right2']).pvalue)
-print("test normality left: ",stats.normaltest(result['left2']).pvalue)
-print("test variance: ",stats.levene(result['right2'], result['left2']).pvalue)
+#print("test normality right: ",stats.normaltest(result['right2']).pvalue)
+#print("test normality left: ",stats.normaltest(result['left2']).pvalue)
+#print("test variance: ",stats.levene(result['right2'], result['left2']).pvalue)
 
 
 ## Compute T-test. Null hypothese: right step and left step have the same step time. If p < 0.05, we reject the null hypothesis
-ttest = stats.ttest_ind(result['right2'], result['left2'])
-print()
-print(ttest)
-print()
+#ttest = stats.ttest_ind(result['right2'], result['left2'])
+#print()
+#print(ttest)
+#print()
 # print(ttest.statistic)
 # print(ttest.pvalue)
 
 
 #pace test
+gait['error']= gait['gap']>1
+gaitgap = gait.loc[gait['gap']>1]
+gaitgap = gaitgap.sum()
+remove = gaitgap['gap']
 #distance calculation
+gait = gait.loc[gait['error']==False]
 gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
 gait['speedP'] = gait['speed'].shift(periods=1)
 gait.dropna(inplace=True)
 #gait['distance(cm)'] = gait['speed'] * (gait['timeN']-gait['time'])
 gait['distance(cm)'] = gait['speed']**2 - gait['speedP']**2 / (gait['ay']*2)
 gait['distance(cm)'] = gait['distance(cm)'] * 100
-gaittest = gait.loc[(gait['distance(cm)']>0)]
-distanceC = gaittest['distance(cm)'].values.sum()
+distanceC = gait['distance(cm)'].values.sum()
 
 #time taken calculation
-timetaken = gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]
+timetaken = (gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]) - remove
 
 #number of step calculation
-result['count'] = 1
-step = result['count'].values.sum()
+step = result['right'].count()
 
 
 print("steps: ",step)
