@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'soo1.csv'
+filename = 'khoa.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -74,8 +74,8 @@ result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False
 result = result.rename(columns={"time": "right", 0: "left"})
 
 
-result = result.loc[(result['right']>0.1)&(result['right']<2)]
-result = result.loc[(result['left']>0.1)&(result['left']<2)]
+result = result.loc[(result['right']>0.3)&(result['right']<1.5)]
+result = result.loc[(result['left']>0.3)&(result['left']<1.5)]
 
 print(filename)
 print("ave a right step(sec): ",result['right'].mean())
@@ -120,6 +120,7 @@ gaitgap = gait.loc[gait['gap']>1]
 gaitgap = gaitgap.sum()
 remove = gaitgap['gap']
 #distance calculation
+
 gait = gait.loc[gait['error']==False]
 gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
 gait['speedP'] = gait['speed'].shift(periods=1)

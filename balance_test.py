@@ -62,8 +62,8 @@ def cleaning(data):
     result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
     result = result.rename(columns={"time": "right", 0: "left"})
 
-    result = result.loc[(result['right']>0.1)&(result['right']<2)]
-    result = result.loc[(result['left']>0.1)&(result['left']<2)]
+    result = result.loc[(result['right']>0.3)&(result['right']<1.5)]
+    result = result.loc[(result['left']>0.3)&(result['left']<1.5)]
     
     return result
 
@@ -94,14 +94,13 @@ def utest(gait):
 
 
 if __name__ == '__main__':
-    filename = 'soo1.csv'
+    filename = 'khoa.csv'
     output = filename[0:-4] + 'result.csv'
     print(filename)
     data = pd.read_csv(filename)
     gait = filter(data)
 
     cleaned_data = cleaning(gait)
-    cleaned_data.to_csv(output, index=False)
 
     ttest_result = ttest(cleaned_data)
     print(ttest_result)

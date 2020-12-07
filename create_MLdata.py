@@ -22,21 +22,43 @@ def filter(gait):
     data['ay'] = signal.filtfilt(b, a, data['ay'])
     return data
 
-def cleaning(data, result):
+def step(data):
     gait = data.copy()
 
-    gait['timeN'] = gait['time'].shift(periods=-1)
-    gait['gap'] = gait['timeN']-gait['time']
-    gait = gait[['time','ay','timeN', 'gap']]
-    gait.dropna(inplace=True)
+    gaitleft = gait.loc[((gait['ay']<0)&(gait['next']>0))]
+    gaitright =  gait.loc[((gait['ay']>0)&(gait['next']<0))]
+    gaitleft = gaitleft.reset_index()
+    gaitright = gaitright.reset_index()
+
+
+    gaitright['timeN'] = gaitright['time'].shift(periods=-1)
+    gaitleft['timeN'] = gaitleft['time'].shift(periods=-1)
+
+
+    if gaitleft['time'][0] > gaitright['time'][0]:
+        steptimeR = gaitleft['time'] - gaitright['time']
+        steptimeL = gaitright['timeN'] - gaitleft['time']
+    else:
+        steptimeL = gaitright['time'] - gaitleft['time']
+        steptimeR = gaitleft['timeN'] - gaitright['time']
+
+
+    steptimeR.dropna(inplace=True)
+    steptimeL.dropna(inplace=True)
+
+    result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
+    result = result.rename(columns={"time": "right", 0: "left"})
+    result = result.loc[(result['right']>0.3)&(result['right']<1.5)]
+    result = result.loc[(result['left']>0.3)&(result['left']<1.5)]
+    step = result['right'].count()
     
-    gait['error']= gait['gap']>1
-    gaitgap = gait.loc[gait['gap']>1]
-    gaitgap = gaitgap.sum()
-    remove = gaitgap['gap']
+    return step
+
+def distance(data):
+    gait = data.copy()
+
     gait = gait.loc[gait['error']==False]
     
-    #distance calculation
     gait['speed'] = gait['ay'] * (gait['timeN']-gait['time'])
     gait['speedP'] = gait['speed'].shift(periods=1)
     gait.dropna(inplace=True)
@@ -44,31 +66,93 @@ def cleaning(data, result):
     gait['distance(cm)'] = gait['distance(cm)'] * 100
     distance = gait['distance(cm)'].values.sum()
 
-    #time taken calculation
+    return distance
+
+def time(data):
+    gait = data.copy()
+
+    gaitgap = gait.loc[gait['gap']>1]
+    gaitgap = gaitgap.sum()
+    remove = gaitgap['gap']
+    
+    time = (gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]) - remove
+
+    return time
+
+def calculation(data,split):
+    gait = data.copy()
+    leng = len(gait['time'])
+    cut = int(leng*(1/split))
+    resultS = np.zeros(split)
+    resultT = np.zeros(split)
+    resultD = np.zeros(split)
+    for i in range (split):
+        splited = gait.loc[(gait['time']>gait['time'].values[cut*(i)])&(gait['time']<gait['time'].values[cut*(i+1)-1])]
+        resultS[i] = step(splited)
+        resultT[i] = time(splited)
+        resultD[i] = distance(splited)
+    print(resultS)
+    print(resultD)
+    print(resultT)
+
+    print(resultD.sum())
+    print(resultS.sum())
+    print(resultT.sum())
+    return resultS, resultT, resultD
+        
+
+def cleaning(data):
+    gait = data.copy()
+    leng = len(gait['time'])
+    cut = int(leng*0.1)
+
+    gait['prev'] = gait['ay'].shift(periods=1)
+    gait['next'] = gait['ay'].shift(periods=-1)
+    gait['timeN'] = gait['time'].shift(periods=-1)
+    gait['gap'] = gait['timeN']-gait['time']
+    gait = gait[['time','ay','next', 'timeN', 'prev', 'gap']]
+    gait.dropna(inplace=True)
+    gait['error']= gait['gap']>1
+    gaitgap = gait.loc[gait['gap']>1]
+    gaitgap = gaitgap.sum()
+    remove = gaitgap['gap']
+    
+
+    #total time taken calculation
     timetaken = (gait['time'].values[len(gait['time'])-1] - gait['time'].values[0]) - remove
 
-    #number of step calculation
-    step = result['right'].count()
-
-
-    print("steps: ",step)
-    print("time: ",timetaken)
-    print("distance: ",distance)
-
-    fixed_distance = 10000
-    print("pace steps/time(sec): ", step/timetaken)
-    #for fixed distance
-    #print("pace steps/distance(m): ", step/fixed_distance)
-    #for calculated distance(device must be placed on foot)
-    print("pace steps/distance(cm): ", step/distance)
-    #unit is cm
-    print("step length(cm): ", distance/step)
+    if timetaken < 60:
+        split=2
+    elif timetaken < 120:
+        split=4
+    elif timetaken < 180:
+        split=6
+    elif timetaken < 240:
+        split=8
+    elif timetaken >= 240:
+        split=10
+    
+    result = calculation(gait,split)
+    return result
 
 if __name__ == "__main__":
-    filename = 'soo1.csv'
-    output = 'soo1result.csv'
+    filename = 'keenan.csv'
+    #output_filename = 'MLdata.csv'
+    output = filename[0:-4] + 'Result.csv'
+    height = 168
     data = pd.read_csv(filename)
-    result = pd.read_csv(output)
+    #output = pd.read_csv(output_filename)
 
     gait = filter(data)
-    cleaned_data = cleaning(gait,result)
+    step, time, distance = cleaning(gait)
+
+    final = {'step':step,
+             'distance':time,
+             'time':distance}
+
+    result = pd.DataFrame(final,columns=['step','distance','time'])
+    result['height'] = height
+
+    #output = pd.concat([output, result], ignore_index=True, sort=False)
+    
+    result.to_csv(output, index=False)
