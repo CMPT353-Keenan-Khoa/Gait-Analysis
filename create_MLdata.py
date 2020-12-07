@@ -157,6 +157,21 @@ def main(filename, height):
     result['height'] = height
     return result
 
+def classify_height(h):
+    group = 0 
+    if h <= 150:
+        group = 0
+    elif h <= 160:
+        group = 1
+    elif h <= 170:
+        group = 2
+    elif h <= 180:
+        group = 3
+    elif h <= 190:
+        group = 4
+    return group
+    
+    
 if __name__ == "__main__":
     # filename = 'soo4.csv'
     # #output_filename = 'MLdata.csv'
@@ -184,10 +199,14 @@ if __name__ == "__main__":
     soo = main('soo4.csv', 158)
     pt = main ('pt.csv', 169)
     phong = main('phong.csv', 165)
+    fake = main('fake.csv', 168)
     result = pd.concat([khoa, khoa2, keenan, soo, pt, phong], axis=0, sort=False)
     result['pace'] = result['step']/result['distance']
+
+    result['range'] = result['height'].map(classify_height)
+    print(result)
 
     graph = result[['step', 'pace', 'height']]
     fig = px.scatter_3d(graph, x='step', y='pace', z='height')
     fig.show()
-    # result.to_csv('mldata.csv', index=False)
+    result.to_csv('mldata.csv', index=False)
