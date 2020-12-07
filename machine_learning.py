@@ -6,7 +6,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
-
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 
 ### x, y are known data input. x_predict is value want to predict
@@ -39,6 +41,29 @@ def polynomial_reg(x,y, x_predict):
     print(y_fit)
     return
 
+
+### for predict gender
+def gender(x, y, x_predict):
+    X_train, X_valid, y_train, y_valid = train_test_split(x, y)
+
+    bayes_model = GaussianNB()
+    bayes_model.fit(X_train, y_train)
+
+    knn_model = KNeighborsClassifier(n_neighbors=5)
+    knn_model.fit(X_train, y_train)
+
+    rf_model = RandomForestClassifier(n_estimators=100, max_depth=3, min_samples_leaf=10)
+    rf_model.fit(X_train, y_train)
+
+    ## If the data is imbalance between male and female. We can rebalance it
+    # female = data[data['gender'] == 1]
+    # male = data[data['gender'] == 0].sample(n=male.shape[0])
+    # balanced_data = female.append(male)
+    
+    print('Bayes Model: ',bayes_model.score(X_valid, y_valid))
+    print('KNN Model: ',knn_model.score(X_valid, y_valid))
+    print('Random Forest Model: ',rf_model.score(X_valid, y_valid))
+    return
 
 
 
