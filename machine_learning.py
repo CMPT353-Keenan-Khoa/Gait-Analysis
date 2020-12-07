@@ -13,14 +13,20 @@ from sklearn.ensemble import RandomForestClassifier
 
 ### x, y are known data input. x_predict is value want to predict
 def linear_reg(x,y, x_predict):
-    X = np.stack([x], axis=1)  # join 1D array to 2D
+    X = np.stack([x['step'], x['pace']], axis=1)  # join 1D array to 2D
     model = LinearRegression(fit_intercept=True)  # Create a model
     model.fit(X, y)     #Train the data
 
     ##Predict data for x_predict value
-    X_fit =  np.stack([x_predict], axis=1)
+    # X_fit =  np.stack([x_predict['step'], x_predict['height']], axis=1)
+    X_fit = x_predict
     y_fit = model.predict(X_fit)
     print(y_fit)
+
+    # plt.plot (x, y, 'b.')
+    # plt.plot(X_fit, y_fit, 'g.')
+    # plt.plot(x, model.predict(X), 'r-')
+    # plt.show()
     return
 
 def polynomial_reg(x,y, x_predict):
@@ -68,5 +74,9 @@ def gender(x, y, x_predict):
 
 
 if __name__ == "__main__":
-    pass
-    
+    data = pd.read_csv('mldata.csv')
+    print(data)
+    x = data[['step', 'pace']]
+    y = data['height']
+    x_predict= np.array([[5, 0.8]])
+    linear_reg(x, y , x_predict)

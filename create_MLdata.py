@@ -2,6 +2,8 @@ import sys
 import pandas as pd
 import numpy as np
 from scipy import signal
+import plotly.express as px
+
 
 def filter(gait):
     data = gait.copy()
@@ -135,11 +137,12 @@ def cleaning(data):
     result = calculation(gait,split)
     return result
 
-if __name__ == "__main__":
-    filename = 'keenan.csv'
+
+def main(filename, height):
+    # filename = 'keenan.csv'
     #output_filename = 'MLdata.csv'
-    output = filename[0:-4] + 'Result.csv'
-    height = 168
+    # output = filename[0:-4] + 'Result.csv'
+    # height = 168
     data = pd.read_csv(filename)
     #output = pd.read_csv(output_filename)
 
@@ -152,7 +155,39 @@ if __name__ == "__main__":
 
     result = pd.DataFrame(final,columns=['step','distance','time'])
     result['height'] = height
+    return result
+
+if __name__ == "__main__":
+    # filename = 'soo4.csv'
+    # #output_filename = 'MLdata.csv'
+    # output = filename[0:-4] + 'Result.csv'
+    # height = 168
+    # data = pd.read_csv(filename)
+    # #output = pd.read_csv(output_filename)
+
+    # gait = filter(data)
+    # step, time, distance = cleaning(gait)
+
+    # final = {'step':step,
+    #          'distance':time,
+    #          'time':distance}
+
+    # result = pd.DataFrame(final,columns=['step','distance','time'])
+    # result['height'] = height
 
     #output = pd.concat([output, result], ignore_index=True, sort=False)
     
-    result.to_csv(output, index=False)
+    # result.to_csv(output, index=False)
+    khoa = main('khoa.csv', 171)
+    khoa2 = main('khoa2.csv', 170)
+    keenan = main('keenan.csv', 168)
+    soo = main('soo4.csv', 158)
+    pt = main ('pt.csv', 169)
+    phong = main('phong.csv', 165)
+    result = pd.concat([khoa, khoa2, keenan, soo, pt, phong], axis=0, sort=False)
+    result['pace'] = result['step']/result['distance']
+
+    graph = result[['step', 'pace', 'height']]
+    fig = px.scatter_3d(graph, x='step', y='pace', z='height')
+    fig.show()
+    # result.to_csv('mldata.csv', index=False)
