@@ -7,7 +7,7 @@ from scipy import stats
 
 
 #filename = sys.argv[1]
-filename = 'khoa.csv'
+filename = 'keenan2.csv'
 output = filename[0:-4] + 'result.csv' 
 gait = pd.read_csv(filename)
 columns = gait.columns
@@ -17,7 +17,7 @@ if 'ay (m/s^2)' in columns:
 
 #time decision
 leng = len(gait['time'])
-cut = int(leng*0.2)
+cut = int(leng*0.1)
 gait = gait.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 #fixed time
 #gait = gait.loc[(gait['time']>100)&(gait['time']<110)]
@@ -73,9 +73,15 @@ steptimeL.dropna(inplace=True)
 result = pd.concat([steptimeR,steptimeL], axis=1, sort=False, ignore_index=False)
 result = result.rename(columns={"time": "right", 0: "left"})
 
+plt.plot(result['right'], 'b-')
+plt.plot(result['left'], 'r-')
+plt.show()
+
 
 result = result.loc[(result['right']>0.3)&(result['right']<1.5)]
 result = result.loc[(result['left']>0.3)&(result['left']<1.5)]
+
+
 
 print(filename)
 print("ave a right step(sec): ",result['right'].mean())

@@ -9,6 +9,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 
 
 ### x, y are known data input. x_predict is value want to predict
@@ -58,12 +61,12 @@ def classification_model(x, y, x_predict):
     bayes_model.fit(X_train, y_train)
     y_bayes_fit = bayes_model.predict(x_predict)
 
-    knn_model = KNeighborsClassifier(n_neighbors=3)
+    knn_model = KNeighborsClassifier(n_neighbors=5)
     knn_model.fit(X_train, y_train)
     y_knn_fit = bayes_model.predict(x_predict)
 
 
-    rf_model = RandomForestClassifier(n_estimators=100, max_depth=3, min_samples_leaf=10)
+    rf_model = RandomForestClassifier(n_estimators=100, max_depth=3)#, min_samples_leaf=5)
     rf_model.fit(X_train, y_train)
     y_rf_fit = bayes_model.predict(x_predict)
 
@@ -84,6 +87,27 @@ def classification_model(x, y, x_predict):
     return
 
 
+def get_clusters(X):
+    """
+    Find clusters of the weather data.
+    """
+    model = make_pipeline(
+        KMeans(n_clusters=5)
+    )
+    model.fit(X)
+    return model.predict(X)
+
+def get_pca(X):
+    """
+    Transform data to 2D points for plotting. Should return an array with shape (n, 2).
+    """
+    flatten_model = make_pipeline(
+        MinMaxScaler(),
+        PCA(2)
+    )
+    X2 = flatten_model.fit_transform(X)
+    assert X2.shape == (X.shape[0], 2)
+    return X2
 
 if __name__ == "__main__":
     data = pd.read_csv('mldata.csv')
@@ -93,7 +117,19 @@ if __name__ == "__main__":
     # linear_reg(x, y , x_predict)
     # polynomial_reg(x, y , x_predict)
 
-    x = data[['step', 'pace']]
+    X = data[['step_length', 'pace']]
     y = data['range']
-    x_predict =[[15, 0.9]]
-    classification_model(x,y, x_predict)
+    x_predict =[[60, 0.9]]
+    classification_model(X,y, x_predict)
+
+    X2 = get_pca(X)
+    clusters = get_clusters(X)
+    plt.scatter(X2[:, 0], X2[:, 1], c=clusters, cmap='Set1', edgecolor='k', s=20)
+    plt.savefig('clusters.png')
+
+    df = pd.DataFrame({
+        'cluster': clusters,
+        'range': y,
+    })
+    counts = pd.crosstab(df['range'], df['cluster'])
+    print(counts)

@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 from scipy import signal
-import plotly.express as px
+#import plotly.express as px
 
 
 def filter(gait):
@@ -15,7 +15,7 @@ def filter(gait):
 
     #time decision
     leng = len(gait['time'])
-    cut = int(leng*0.2)
+    cut = int(leng*0.1)
     data = data.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 
 
@@ -131,8 +131,18 @@ def cleaning(data):
         split=6
     elif timetaken < 240:
         split=8
-    elif timetaken >= 240:
+    elif timetaken < 300:
         split=10
+    elif timetaken < 360:
+        split=12
+    elif timetaken < 420:
+        split=14
+    elif timetaken < 480:
+        split=16
+    elif timetaken < 540:
+        split=18
+    elif timetaken >= 540:
+        split=20
     
     result = calculation(gait,split)
     return result
@@ -150,8 +160,8 @@ def main(filename, height):
     step, time, distance = cleaning(gait)
 
     final = {'step':step,
-             'distance':time,
-             'time':distance}
+             'distance':distance,
+             'time':time}
 
     result = pd.DataFrame(final,columns=['step','distance','time'])
     result['height'] = height
@@ -196,17 +206,23 @@ if __name__ == "__main__":
     khoa = main('khoa.csv', 171)
     khoa2 = main('khoa2.csv', 170)
     keenan = main('keenan.csv', 168)
-    soo = main('soo4.csv', 158)
+    sun = main('sun.csv', 153)
+    keenan2 = main('keenan2.csv', 168)
+    #soo = main('soo4.csv', 158)
+    #soo2 = main('soo5.csv', 158)
     pt = main ('pt.csv', 169)
     phong = main('phong.csv', 165)
+    sang = main('sang.csv', 187)
+    jin = main('jin.csv', 185)
     fake = main('fake.csv', 168)
-    result = pd.concat([khoa, khoa2, keenan, soo, pt, phong], axis=0, sort=False)
-    result['pace'] = result['step']/result['distance']
+    result = pd.concat([khoa, khoa2, keenan, pt, phong, sang, jin,keenan2, sun ], axis=0, sort=False)
+    result['pace'] = result['step']/result['time']
+    result['step_length'] = result['distance']/result['step']
 
     result['range'] = result['height'].map(classify_height)
     print(result)
 
     graph = result[['step', 'pace', 'height']]
-    fig = px.scatter_3d(graph, x='step', y='pace', z='height')
-    fig.show()
+    #fig = px.scatter_3d(graph, x='step', y='pace', z='height')
+    #fig.show()
     result.to_csv('mldata.csv', index=False)

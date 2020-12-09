@@ -16,7 +16,7 @@ def filter(gait):
 
     #time decision
     leng = len(gait['time'])
-    cut = int(leng*0.2)
+    cut = int(leng*0.1)
     data = data.loc[(gait['time']>gait['time'].values[cut])&(gait['time']<gait['time'].values[leng-cut])]
 
 
@@ -94,7 +94,7 @@ def utest(gait):
 
 
 if __name__ == '__main__':
-    filename = 'khoa.csv'
+    filename = 'soo7.csv'
     output = filename[0:-4] + 'result.csv'
     print(filename)
     data = pd.read_csv(filename)
