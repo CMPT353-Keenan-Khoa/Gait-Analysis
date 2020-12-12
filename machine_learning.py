@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.ensemble import GradientBoostingClassifier
 
 
 ### x, y are known data input. x_predict is value want to predict
@@ -55,20 +56,12 @@ def polynomial_reg(x,y, x_predict):
 
 
 def classification_model(x, y, x_predict):
-    X_train, X_valid, y_train, y_valid = train_test_split(x, y)
-
-    bayes_model = GaussianNB()
-    bayes_model.fit(X_train, y_train)
-    y_bayes_fit = bayes_model.predict(x_predict)
-
-    knn_model = KNeighborsClassifier(n_neighbors=5)
-    knn_model.fit(X_train, y_train)
-    y_knn_fit = bayes_model.predict(x_predict)
+    X_train, X_valid, y_train, y_valid = train_test_split(x, y)\
 
 
-    rf_model = RandomForestClassifier(n_estimators=100, max_depth=3)#, min_samples_leaf=5)
+    rf_model = RandomForestClassifier(n_estimators=500, max_depth=5)#, min_samples_leaf=0.1)
     rf_model.fit(X_train, y_train)
-    y_rf_fit = bayes_model.predict(x_predict)
+    y_rf_fit = rf_model.predict(x_predict)
 
 
     ## If the data is imbalance between male and female. We can rebalance it
@@ -76,12 +69,7 @@ def classification_model(x, y, x_predict):
     # male = data[data['gender'] == 0].sample(n=male.shape[0])
     # balanced_data = female.append(male)
     
-    print('Bayes Model: ',bayes_model.score(X_valid, y_valid))
-    print('KNN Model: ',knn_model.score(X_valid, y_valid))
     print('Random Forest Model: ',rf_model.score(X_valid, y_valid))
-
-    print("Bayes predict: ",y_bayes_fit)
-    print("KNN predict: ",y_knn_fit)
     print("Random Forest predict: ",y_rf_fit)
 
     return
@@ -116,20 +104,37 @@ if __name__ == "__main__":
     # x_predict= np.array([[0.9]])
     # linear_reg(x, y , x_predict)
     # polynomial_reg(x, y , x_predict)
+    plt.plot (data.loc[data['range']==1]['pace'], data.loc[data['range']==1]['step_length'], 'ro')
+    plt.plot (data.loc[data['range']==2]['pace'], data.loc[data['range']==2]['step_length'], 'go')
+    plt.plot (data.loc[data['range']==3]['pace'], data.loc[data['range']==3]['step_length'], 'yo')
+    plt.plot (data.loc[data['range']==4]['pace'], data.loc[data['range']==4]['step_length'], 'bo')
+    
+    #plt.plot (data.loc[data['range']==1]['step_length'], 'ro')
+    #plt.plot (data.loc[data['range']==2]['step_length'], 'go')
+    #plt.plot (data.loc[data['range']==3]['step_length'], 'yo')
+    #plt.plot (data.loc[data['range']==4]['step_length'], 'bo')
+    #plt.ylabel('step_length')
 
-    X = data[['step_length', 'pace']]
+    #plt.plot (data.loc[data['range']==1]['pace'], 'ro')
+    #plt.plot (data.loc[data['range']==2]['pace'], 'go')
+    #plt.plot (data.loc[data['range']==3]['pace'], 'yo')
+    #plt.plot (data.loc[data['range']==4]['pace'], 'bo')
+    #plt.ylabel('pace')
+    
+    plt.show()
+    X = data[['pace','step_length']]
     y = data['range']
-    x_predict =[[60, 0.9]]
+    x_predict =[[0.85,60]]
     classification_model(X,y, x_predict)
 
-    X2 = get_pca(X)
-    clusters = get_clusters(X)
-    plt.scatter(X2[:, 0], X2[:, 1], c=clusters, cmap='Set1', edgecolor='k', s=20)
-    plt.savefig('clusters.png')
+    #X2 = get_pca(X)
+    #clusters = get_clusters(X)
+    #plt.scatter(X2[:, 0], X2[:, 1], c=clusters, cmap='Set1', edgecolor='k', s=20)
+    #plt.savefig('clusters.png')
 
-    df = pd.DataFrame({
-        'cluster': clusters,
-        'range': y,
-    })
-    counts = pd.crosstab(df['range'], df['cluster'])
-    print(counts)
+    #df = pd.DataFrame({
+    #    'cluster': clusters,
+    #    'range': y,
+    #})
+    #counts = pd.crosstab(df['range'], df['cluster'])
+    #print(counts)

@@ -208,18 +208,24 @@ if __name__ == "__main__":
     keenan = main('keenan.csv', 168)
     sun = main('sun.csv', 153)
     keenan2 = main('keenan2.csv', 168)
-    #soo = main('soo4.csv', 158)
-    #soo2 = main('soo5.csv', 158)
+    soo = main('soo4.csv', 158)
+    soo2 = main('soo5.csv', 158)
+    yeon = main('yeon.csv', 163)
+    yeon2 = main('yeon2.csv', 163)
     pt = main ('pt.csv', 169)
     phong = main('phong.csv', 165)
     sang = main('sang.csv', 187)
     jin = main('jin.csv', 185)
     fake = main('fake.csv', 168)
-    result = pd.concat([khoa, khoa2, keenan, pt, phong, sang, jin,keenan2, sun ], axis=0, sort=False)
+    result = pd.concat([khoa, khoa2, keenan, pt, phong, sang, jin,keenan2, sun, yeon], axis=0, sort=False)
     result['pace'] = result['step']/result['time']
     result['step_length'] = result['distance']/result['step']
 
     result['range'] = result['height'].map(classify_height)
+    count = result.copy()
+    count['count'] = 1
+    count = count.groupby('range').sum()
+    print(count)
     print(result)
 
     graph = result[['step', 'pace', 'height']]
